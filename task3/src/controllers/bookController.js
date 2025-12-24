@@ -1,8 +1,8 @@
 import schema from "../utils/validate.js";
 
 let books = [
-    { id: 1, title: "Clean Code", price: 30 },
-    { id: 2, title: "JavaScript Basics", price: 20 }
+    { id: 1, title: "Clean Code", author: "Robert Martin", price: 30 },
+    { id: 2, title: "JavaScript Basics", author: "John Doe", price: 20 }
 ];
 
 export const getAllBooks = (req, res) => {
@@ -17,11 +17,26 @@ export const getBookById = (req, res) => {
         return res.status(404).json({ message: "Book not found" });
     }
 
-    try { res.status(200).json(book); }
-    catch (err) {
-        next(err);
-    }
+    res.status(200).json(book);
+
 };
+
+export const searchBooks = (req, res) => {
+    res.status(200).send("you are on the search page")
+}
+
+export const deleteBook = (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = books.findIndex(b => b.id === id);
+
+    if (index === -1) {
+        res.status(404).json({ message: "Book Not Found" })
+    }
+
+    books.splice(index, 1);
+
+    res.status(200).json({ message: "Book deleted successfully" })
+}
 
 export const createBook = (req, res) => {
     const { error, value } = schema.validate(req.body);
@@ -33,6 +48,7 @@ export const createBook = (req, res) => {
     const newBook = {
         id: books.length ? books[books.length - 1].id + 1 : 1,
         title: value.title,
+        author: value.author,
         price: value.price
     };
 
