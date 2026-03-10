@@ -6,8 +6,8 @@ import dotenv from "dotenv";
 import RefreshToken from "../model/refreshToken.js";
 export const SignUp = async (req, res, next) => {
     try {
-        const{name,email,password}=req.body;
-        if(!name|| !email|| !password){
+        const{full_name,email,password}=req.body;
+        if(!full_name|| !email|| !password){
             const error= new Error("required credentials incomplete");
             error.statusCode =400;
             throw error;
@@ -25,11 +25,8 @@ export const SignUp = async (req, res, next) => {
         } 
 
         const hashed_password=await bycrpt.hash(password,10);
-        const newUser= await User.create({name,email,password:hashed_password});
-        res.status(201).json({
-            success: true,
-            data: newUser
-        });
+        const newUser= await User.create({full_name,email,password:hashed_password});
+
         const accessToken = jwt.sign(
             { userId: newUser._id}, 
             process.env.ACCESS_TOKEN_PRIVATE_KEY, 
@@ -50,7 +47,11 @@ export const SignUp = async (req, res, next) => {
             sameSite: "lax",
             httpOnly: true,
             secure: false,
-         });    
+         }); 
+         res.status(201).json({
+            success: true,
+            data: newUser
+        });   
 
     } catch (error) {
         next(error);
@@ -79,10 +80,32 @@ export const SignIn = async (req, res, next) => {
             throw error;
         }
 
-        res.status(200).json({
+       
+        const accessToken = jwt.sign(
+            { userId: newUser._id}, 
+            process.env.ACCESS_TOKEN_PRIVATE_KEY, 
+            {expiresIn: process.env.ACCESS_TOKEN_EXPIRE_DATE});
+
+        const refreshToken=jwt.sign(
+            { userId: newUser._id},
+            process.env.REFRESH_TOKEN_PRIVATE_KEY,
+            {expiresIn: process.env.REFRESH_TOKEN_EXPIRE_DATE});
+         res.cookie("accessToken", accessToken,{
+            maxAge: 60000 * 15,
+            sameSite: "lax",
+            httpOnly: true,
+            secure: false,
+         });
+         res.cookie("refreshToken", refreshToken,{
+            maxAge: 60000 * 60 * 24 * 30,
+            sameSite: "lax",
+            httpOnly: true,
+            secure: false,
+         });  
+         res.status(200).json({
             success: true,
             data:user
-        })
+        });  
     } catch (error) {
         next(error);
     }

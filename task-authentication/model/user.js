@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
-    username:{
+    full_name:{
         type : String,
         requied: [true, "Name is required"],
         minLength: [3, "Name must be at least 3 characters"],
@@ -20,19 +20,13 @@ const userSchema = new mongoose.Schema({
         minLength: [6, "Password must be at least 6 characters"]
     },
   
-    // role: {
-    //   type: String,
-    //   enum: ["user", "admin"],
-    //   default: "user"
-    // },
+  });
+//   userSchema.pre("save", async function(next) {
+//     if(!this.isModified("password")) return next();
   
-    // refreshToken: String,
+//     const salt = await bcrypt.genSalt(10);
+//     this.password = await bcrypt.hash(this.password, salt);
+//     next();
+//   });
   
-    // isVerified: {
-    //   type: Boolean,
-    //   default: false
-    // },
-  
-   // passwordChangedAt: Date
-  })
   export default mongoose.model("User", userSchema)
