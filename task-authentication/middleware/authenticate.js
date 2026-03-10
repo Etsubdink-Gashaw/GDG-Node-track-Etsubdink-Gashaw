@@ -21,18 +21,3 @@ export const authenticate = async (req, res, next) => {
         next(error);
     }   
 }
-
-export const logout = async (req, res, next) => {
-    try {
-        const refresh_token = req.cookies.refreshToken;
-        if (!refresh_token) {
-            const error = new Error("Refresh token not found");
-            error.statusCode = 401;
-            throw error;
-        }
-        
-        res.status(200).json({ message: "Logged out successfully" });
-    } catch (error) {
-        next(error);
-    }
-};

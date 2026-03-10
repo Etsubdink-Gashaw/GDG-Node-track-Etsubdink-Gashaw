@@ -48,6 +48,7 @@ export const SignUp = async (req, res, next) => {
             httpOnly: true,
             secure: false,
          }); 
+         delete newUser.password;
          res.status(201).json({
             success: true,
             data: newUser
@@ -101,7 +102,8 @@ export const SignIn = async (req, res, next) => {
             sameSite: "lax",
             httpOnly: true,
             secure: false,
-         });  
+         }); 
+         delete user.password; 
          res.status(200).json({
             success: true,
             data:user
@@ -111,3 +113,18 @@ export const SignIn = async (req, res, next) => {
     }
 
 }
+export const logout = async (req, res, next) => {
+    try {
+        const refresh_token = req.cookies.refreshToken;
+        if (!refresh_token) {
+            const error = new Error("Refresh token not found");
+            error.statusCode = 401;
+            throw error;
+        }
+        await RefreshToken.findOneAndDelete({ token: refresh_token });
+        res.clearCookie("refreshToken");     
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        next(error);
+    }
+};
